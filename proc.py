@@ -3,7 +3,7 @@
 
 import csv
 import datetime
-
+import re
 
 def mysql_quote(x):
     """Quote the string x using MySQL quoting rules. If x is the empty string,
@@ -36,12 +36,13 @@ def main():
             # assertion is here to make sure we know all such grantees.
             zero_amounts = ['Farm Africa USA, Inc.', 'George Washington University']
             assert int(amount) or row['grantee'] in zero_amounts, (amount, row['grantee'])
-
+            donee = row['grantee']
+            donee = re.sub(r",? inc\.?$", "", donee, flags=re.IGNORECASE)
             donation_date = datetime.datetime.strptime(row['Award Date'], "%m/%d/%Y").strftime("%Y-%m-%d")
 
             print(("    " if first else "    ,") + "(" + ",".join([
                 mysql_quote("Barr Foundation"),  # donor
-                mysql_quote(row['grantee']),  # donee
+                mysql_quote(donee),  # donee
                 amount,  # amount
                 mysql_quote(donation_date),  # donation_date
                 mysql_quote("day"),  # donation_date_precision
